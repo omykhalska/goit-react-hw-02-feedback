@@ -1,4 +1,8 @@
 import React, { Component } from 'react';
+import Statistics from '../Statistics';
+import FeedbackOptions from '../FeedbackOptions';
+import Section from '../Section';
+import Notification from '../Notification';
 import { Container } from './App.styled';
 
 class App extends Component {
@@ -8,62 +12,49 @@ class App extends Component {
     bad: 0,
   };
 
-  addGoodReview = () => {
+  leaveFeedback = type => {
     this.setState(prevState => ({
-      good: prevState.good + 1,
+      [type]: prevState[type] + 1,
     }));
   };
 
-  addBadReview = () => {
-    this.setState(prevState => ({
-      bad: prevState.bad + 1,
-    }));
+  countTotalFeedback = () => {
+    const { good, bad, neutral } = this.state;
+    return good + bad + neutral;
   };
 
-  addNeutralReview = () => {
-    this.setState(prevState => ({
-      neutral: prevState.neutral + 1,
-    }));
-  };
-
-  countTotalFeedback = () =>
-    this.state.good + this.state.bad + this.state.neutral;
-
-  countPositiveFeedbackPercentage = () => {
-    return Math.round((this.state.good * 100) / this.countTotalFeedback());
-  };
+  countPositiveFeedbackPercentage = () =>
+    Math.round((this.state.good * 100) / this.countTotalFeedback());
 
   render() {
+    const {
+      leaveFeedback,
+      countTotalFeedback,
+      countPositiveFeedbackPercentage,
+    } = this;
+    const { good, bad, neutral } = this.state;
+
     return (
       <Container>
-        <section>
-          <h2>Please, leave feedback</h2>
-          <button type="button" onClick={this.addGoodReview}>
-            Good
-          </button>
-          <button type="button" onClick={this.addNeutralReview}>
-            Neutral
-          </button>
-          <button type="button" onClick={this.addBadReview}>
-            Bad
-          </button>
-        </section>
-        <section>
-          <h2>Statistics</h2>
-          {this.countTotalFeedback() === 0 ? (
-            <p>No feedback given</p>
+        <Section title={'Please, leave feedback'}>
+          <FeedbackOptions
+            options={['good', 'neutral', 'bad']}
+            onLeaveFeedback={leaveFeedback}
+          />
+        </Section>
+        <Section title={'Statistics'}>
+          {countTotalFeedback() === 0 ? (
+            <Notification message="There is no feedback" />
           ) : (
-            <ul>
-              <li>Good: {this.state.good}</li>
-              <li>Neutral: {this.state.neutral}</li>
-              <li>Bad: {this.state.bad}</li>
-              <li>Total: {this.countTotalFeedback()}</li>
-              <li>
-                Positive feedback: {this.countPositiveFeedbackPercentage()}%
-              </li>
-            </ul>
+            <Statistics
+              good={good}
+              neutral={neutral}
+              bad={bad}
+              total={countTotalFeedback()}
+              positivePercentage={countPositiveFeedbackPercentage()}
+            />
           )}
-        </section>
+        </Section>
       </Container>
     );
   }
